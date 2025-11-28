@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYSTEM PORTFOLIO // ARCHIVES</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Rajdhani', 'sans-serif'],
+                        mono: ['"Share Tech Mono"', 'monospace'],
+                    },
+                    colors: {
+                        cyber: {
+                            black: '#050505',
+                            dark: '#0a0f14',
+                            cyan: '#00f3ff',
+                            pink: '#ff00ff',
+                            amber: '#f59e0b',
+                            emerald: '#10b981', // Vert Matrix
+                            rose: '#f43f5e',    // Rouge Alerte
+                            violet: '#8b5cf6'   // Violet Deep
+                        }
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- 1. STYLES GLOBAUX -->
+    <?!= include('style'); ?>
+
+    <!-- 2. STYLE LOCAL : AMÉLIORATION GLITCH LOGIN -->
+    <style>
+        .glitch-title {
+            position: relative;
+            color: white;
+        }
+        .glitch-title::before,
+        .glitch-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Match parfait avec le fond de la carte (cyber-dark/90) pour éviter le bloc noir */
+            background: rgba(10, 15, 20, 0.9); 
+        }
+        .glitch-title::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff; /* Effet Pink */
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            animation: glitch-anim-title 3s infinite linear alternate-reverse;
+        }
+        .glitch-title::after {
+            left: -2px;
+            text-shadow: -2px 0 #00f3ff; /* Effet Cyan */
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            animation: glitch-anim-title-2 2.5s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim-title {
+            0% { clip-path: inset(10% 0 80% 0); }
+            20% { clip-path: inset(80% 0 10% 0); }
+            40% { clip-path: inset(10% 0 50% 0); }
+            60% { clip-path: inset(60% 0 30% 0); }
+            80% { clip-path: inset(30% 0 60% 0); }
+            100% { clip-path: inset(90% 0 5% 0); }
+        }
+        @keyframes glitch-anim-title-2 {
+            0% { clip-path: inset(50% 0 40% 0); }
+            20% { clip-path: inset(20% 0 70% 0); }
+            40% { clip-path: inset(90% 0 10% 0); }
+            60% { clip-path: inset(10% 0 80% 0); }
+            80% { clip-path: inset(70% 0 20% 0); }
+            100% { clip-path: inset(30% 0 50% 0); }
+        }
+    </style>
+</head>
+<body class="text-slate-300 antialiased font-sans selection:bg-cyber-cyan selection:text-cyber-black min-h-screen overflow-x-hidden bg-cyber-black">
+
+    <!-- CANVAS RÉSEAU NEURONAL -->
+    <canvas id="neural-canvas" class="fixed inset-0 z-0 pointer-events-none opacity-40"></canvas>
+    
+    <!-- Scanline overlay légère par dessus le canvas -->
+    <div class="fixed inset-0 z-0 pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwMDAwIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')] opacity-50"></div>
+
+    <!-- === ÉCRAN DE CONNEXION (LOGIN) === -->
+    <section id="login-screen" class="fixed inset-0 z-50 bg-cyber-black flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-md border border-cyber-cyan/30 bg-cyber-dark/90 p-8 relative overflow-hidden cyber-card theme-cyan backdrop-blur-xl shadow-[0_0_50px_rgba(0,243,255,0.15)]">
+            
+            <!-- Header Login -->
+            <div class="text-center mb-8">
+                <div class="inline-block px-2 py-1 border border-cyber-cyan text-cyber-cyan font-mono text-xs mb-4 animate-pulse">
+                    SECURE_GATEWAY_V4
+                </div>
+                <!-- UTILISATION DE LA NOUVELLE CLASSE GLITCH-TITLE -->
+                <h1 class="text-4xl font-display font-bold text-white tracking-widest glitch-title" data-text="IDENTIFICATION">
+                    IDENTIFICATION
+                </h1>
+            </div>
+
+            <!-- Formulaire -->
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-xs font-mono text-slate-500 mb-2">ENTER_ACCESS_CODE</label>
+                    <input type="password" id="access-code-input" 
+                           class="w-full bg-black border border-slate-700 text-cyber-cyan p-3 font-mono text-center tracking-[0.5em] focus:outline-none focus:border-cyber-cyan transition-colors placeholder-slate-800 shadow-inner"
+                           placeholder="••••••••" 
+                           onkeypress="handleLoginKey(event)">
+                </div>
+
+                <button onclick="attemptLogin()" id="login-btn"
+                        class="w-full bg-cyber-cyan/10 hover:bg-cyber-cyan/20 border border-cyber-cyan text-cyber-cyan py-3 font-mono font-bold tracking-wider transition-all hover:shadow-[0_0_20px_rgba(0,243,255,0.4)] group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-cyber-cyan/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                    <span class="relative group-hover:hidden">INITIALIZE_HANDSHAKE</span>
+                    <span class="relative hidden group-hover:inline">> EXECUTE_LOGIN</span>
+                </button>
+
+                <!-- Status Log -->
+                <div id="login-status" class="h-6 text-center font-mono text-xs text-red-500"></div>
+            </div>
+
+            <!-- Décoration bas -->
+            <div class="mt-8 flex justify-between text-[10px] font-mono text-slate-600">
+                <span>ENCRYPTION: AES-256</span>
+                <span>SERVER: ONLINE</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- === APPLICATION PRINCIPALE === -->
+    <div id="app-container" class="hidden-view relative z-10 transition-opacity duration-1000 flex flex-col min-h-screen">
+        
+        <!-- HEADER "COMMAND CENTER" -->
+        <header class="sticky top-0 z-40 bg-cyber-black/80 backdrop-blur-md border-b border-slate-800 shadow-2xl">
+            
+            <!-- Top Bar -->
+            <div class="h-8 border-b border-slate-800 flex justify-between items-center px-4 md:px-12 text-[10px] font-mono text-slate-500 bg-cyber-dark/50">
+                <div class="flex gap-4">
+                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> NET_ONLINE</span>
+                    <span class="hidden sm:inline text-slate-600">|</span>
+                    <span class="hidden sm:inline">LATENCY: <span id="latency-display">12ms</span></span>
+                    <span class="hidden sm:inline text-slate-600">|</span>
+                    <span class="hidden sm:inline text-cyber-cyan">AUDIO: <span id="audio-status">OFF</span></span>
+                </div>
+                <div class="flex gap-4">
+                    <span id="system-clock" class="text-slate-300 font-bold tracking-widest">00:00:00</span>
+                    <span class="hidden sm:inline text-slate-600">|</span>
+                    <span>LOC: FR_PARIS</span>
+                </div>
+            </div>
+
+            <!-- Main Nav Bar -->
+            <nav class="h-20 flex justify-between items-center px-4 md:px-12 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-cyber-cyan/20"></div>
+                
+                <!-- Logo -->
+                <div class="flex items-center gap-4 group cursor-pointer" onclick="returnToLobby()">
+                    <div class="relative w-10 h-10 flex items-center justify-center border border-slate-700 bg-slate-900/50 group-hover:border-cyber-cyan transition-colors duration-300">
+                        <svg class="w-6 h-6 text-cyber-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <div class="absolute top-0 left-0 w-1 h-1 bg-cyber-cyan"></div>
+                        <div class="absolute bottom-0 right-0 w-1 h-1 bg-cyber-cyan"></div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-display font-bold text-2xl text-white tracking-widest leading-none group-hover:text-cyber-cyan transition-colors">SYSTEM_<span class="text-cyber-cyan">ARCHIVES</span></span>
+                        <span class="font-mono text-[10px] text-slate-500 tracking-[0.3em]">CLASSIFIED PROJECT DATA</span>
+                    </div>
+                </div>
+
+                <!-- Right Side -->
+                <div class="flex items-center gap-4 md:gap-8">
+                    <button onclick="toggleAudio()" class="p-2 text-slate-500 hover:text-cyber-cyan transition-colors" title="Toggle Audio FX">
+                        <svg id="audio-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" stroke-dasharray="20 20" stroke-dashoffset="0"/><path id="audio-waves" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
+                    </button>
+
+                    <div class="hidden md:block text-right font-mono text-xs border-r border-slate-800 pr-8 mr-4">
+                        <div class="text-slate-500 text-[10px] uppercase tracking-wider">Current Operator</div>
+                        <div class="text-cyber-cyan font-bold tracking-wide flex items-center justify-end gap-2">
+                            <span class="w-1.5 h-1.5 bg-cyber-cyan rounded-full animate-pulse"></span>
+                            <span id="user-badge">GUEST</span>
+                        </div>
+                    </div>
+
+                    <button onclick="playSfx('click'); openProfile()" class="relative px-4 py-2 border border-slate-700 bg-slate-900/50 hover:bg-cyber-cyan/10 hover:border-cyber-cyan transition-all group flex items-center gap-3">
+                        <div class="w-8 h-8 rounded bg-slate-800 overflow-hidden border border-slate-600 group-hover:border-cyber-cyan transition-colors">
+                            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Architect&backgroundColor=0a0f14" alt="User" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity">
+                        </div>
+                        <span class="hidden md:inline font-mono text-xs text-slate-300 group-hover:text-white tracking-wider">OPERATOR_PROFILE</span>
+                        <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-cyber-cyan opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-cyber-cyan opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </button>
+                </div>
+            </nav>
+            <div class="h-px w-full bg-gradient-to-r from-transparent via-cyber-cyan/50 to-transparent shadow-[0_0_10px_rgba(0,243,255,0.3)]"></div>
+        </header>
+
+        <!-- Contenu Principal -->
+        <div class="flex-grow max-w-7xl mx-auto w-full p-4 md:p-12 relative z-10">
+            
+            <!-- VUE 1: LOBBY -->
+            <main id="main-lobby" class="fade-in pt-8">
+                <header class="mb-8">
+                    <h1 class="text-4xl md:text-6xl font-display font-bold text-white mb-4 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">ARCHIVES PROJETS</h1>
+                    <p class="text-slate-400 max-w-2xl border-l-2 border-cyber-pink pl-4">
+                        Accès aux dossiers classifiés. Sélectionnez un protocole pour initialiser le chargement des données.
+                    </p>
+                </header>
+
+                <!-- FILTRES -->
+                <div class="mb-8 flex flex-wrap gap-4" id="filter-container">
+                    <button onclick="filterProjects('all')" onmouseenter="playSfx('hover')" class="filter-btn active px-4 py-1 border border-cyber-cyan text-cyber-cyan text-xs font-mono hover:bg-cyber-cyan/20 transition-all uppercase tracking-wider bg-cyber-cyan/10">
+                        // ALL_SYSTEMS
+                    </button>
+                    <button onclick="filterProjects('Apps Script')" onmouseenter="playSfx('hover')" class="filter-btn px-4 py-1 border border-slate-700 text-slate-500 text-xs font-mono hover:border-cyber-cyan hover:text-cyber-cyan transition-all uppercase tracking-wider">
+                        APPS_SCRIPT
+                    </button>
+                    <button onclick="filterProjects('Web App')" onmouseenter="playSfx('hover')" class="filter-btn px-4 py-1 border border-slate-700 text-slate-500 text-xs font-mono hover:border-cyber-cyan hover:text-cyber-cyan transition-all uppercase tracking-wider">
+                        WEB_APPS
+                    </button>
+                    <button onclick="filterProjects('Data')" onmouseenter="playSfx('hover')" class="filter-btn px-4 py-1 border border-slate-700 text-slate-500 text-xs font-mono hover:border-cyber-cyan hover:text-cyber-cyan transition-all uppercase tracking-wider">
+                        DATA_ENG
+                    </button>
+                </div>
+
+                <div id="portfolio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </main>
+
+            <!-- VUE 2: DÉTAIL -->
+            <section id="project-detail" class="hidden-view w-full pb-12 pt-8">
+                <button id="back-btn" onclick="playSfx('back')" class="mb-8 flex items-center gap-2 text-slate-400 hover:text-white transition-colors group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span class="font-mono text-sm">RETOUR_INDEX</span>
+                </button>
+                <div id="detail-content" class="animate-fadeIn"></div>
+            </section>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="relative z-10 mt-auto border-t border-slate-800 bg-cyber-dark/95 pt-16 pb-8 backdrop-blur-md">
+            <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyber-cyan/50 to-transparent shadow-[0_0_10px_rgba(0,243,255,0.5)]"></div>
+            <div class="max-w-7xl mx-auto px-4 md:px-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                    <!-- Identité -->
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 bg-cyber-cyan rounded-full animate-pulse shadow-[0_0_10px_#00f3ff]"></div>
+                            <span class="font-display font-bold text-xl text-white tracking-widest">SYSTEM_<span class="text-cyber-cyan">ARCHIVES</span></span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-mono leading-relaxed border-l border-slate-800 pl-4">
+                            Centralized Neural Repository for classified project data.<br>Authorized personnel access only.<br>Encryption Level: MIL-SPEC-256.
+                        </p>
+                    </div>
+                    <!-- Nav -->
+                    <div>
+                        <h4 class="font-mono text-xs font-bold text-cyber-pink mb-6 flex items-center"><span class="w-1 h-4 bg-cyber-pink mr-2"></span>/// NAVIGATION_CORE</h4>
+                        <ul class="space-y-3 text-xs font-mono text-slate-400">
+                            <li><a href="#" onclick="returnToLobby()" class="hover:text-cyber-pink transition-colors hover:pl-2 duration-300 flex items-center group"><span class="opacity-0 group-hover:opacity-100 mr-1 text-cyber-pink">></span> DASHBOARD_MAIN</a></li>
+                            <li><a href="#" onclick="playSfx('click'); openProfile()" class="hover:text-cyber-pink transition-colors hover:pl-2 duration-300 flex items-center group"><span class="opacity-0 group-hover:opacity-100 mr-1 text-cyber-pink">></span> OPERATOR_PROFILE</a></li>
+                        </ul>
+                    </div>
+                    <!-- Légal -->
+                    <div>
+                        <h4 class="font-mono text-xs font-bold text-cyber-amber mb-6 flex items-center"><span class="w-1 h-4 bg-cyber-amber mr-2"></span>/// PROTOCOLS_LEGAL</h4>
+                        <ul class="space-y-3 text-xs font-mono text-slate-400">
+                            <li><a href="#" onclick="playSfx('click')" class="hover:text-cyber-amber transition-colors hover:pl-2 duration-300 flex items-center group"><span class="opacity-0 group-hover:opacity-100 mr-1 text-cyber-amber">></span> TERMS_OF_USE</a></li>
+                        </ul>
+                    </div>
+                    <!-- Metrics -->
+                    <div class="bg-slate-900/50 p-4 border border-slate-800 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-1"><div class="w-2 h-2 bg-cyber-emerald rounded-full animate-pulse"></div></div>
+                        <h4 class="font-mono text-xs font-bold text-cyber-emerald mb-4">/// SYSTEM_METRICS</h4>
+                        <div class="space-y-3 text-[10px] font-mono text-slate-500">
+                            <div class="flex justify-between border-b border-slate-800 pb-1"><span>UPTIME</span><span class="text-cyber-emerald font-bold">99.9%</span></div>
+                            <div class="mt-2"><span class="block mb-1">CPU_LOAD</span><div class="w-full bg-slate-800 h-1 rounded-full overflow-hidden"><div class="bg-cyber-emerald w-1/3 h-full animate-[pulse_2s_ease-in-out_infinite]"></div></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-mono text-slate-600">
+                    <div class="flex flex-wrap justify-center gap-6"><span>© 2025 SYSTEM ARCHIVES INC.</span><span>|</span><span>MADE_WITH_APPS_SCRIPT</span><span>|</span><span>CLASSIFIED_ACCESS</span></div>
+                    <div class="flex items-center gap-2 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-800"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span></span><span class="text-green-500 font-bold">SYSTEM_OPERATIONAL</span><span>|</span><span>V.3.1.4</span></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- MODALE PROFIL -->
+    <div id="profile-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="w-full max-w-2xl bg-cyber-dark border border-slate-700 relative cyber-card theme-cyan transform scale-95 transition-transform duration-300" id="profile-content">
+            <button onclick="closeProfile()" class="absolute top-4 right-4 text-slate-500 hover:text-red-500 transition-colors z-10"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            <div class="p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center md:text-left space-y-4">
+                    <div class="w-32 h-32 mx-auto md:mx-0 bg-slate-800 rounded-full border-2 border-cyber-cyan overflow-hidden relative group"><img src="https://api.dicebear.com/7.x/bottts/svg?seed=Architect&backgroundColor=0a0f14" alt="Avatar" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500"></div>
+                    <div><h3 class="text-2xl font-display font-bold text-white">L'ARCHITECTE</h3><p class="text-cyber-cyan font-mono text-xs">SYSTEM_ADMINISTRATOR</p></div>
+                    <div class="text-xs text-slate-400 font-mono space-y-1 border-t border-slate-800 pt-2"><p>LOC: PARIS_FR</p><p>EXP: 10_YEARS</p><p>ID: #8492-A</p></div>
+                </div>
+                <div class="md:col-span-2 space-y-6">
+                    <div><h4 class="font-mono text-xs text-slate-500 border-b border-slate-800 pb-2 mb-3 flex justify-between"><span>/// BIO_DATA</span><span class="text-cyber-emerald text-[10px] animate-pulse">ONLINE</span></h4><p class="text-slate-300 text-sm leading-relaxed">Expert en conception de systèmes numériques et en automatisation de processus. Spécialisé dans l'écosystème Google Workspace (Apps Script, Sheets, Cloud) et le développement d'interfaces réactives modernes.<br><br>Ma mission : transformer la complexité opérationnelle en fluidité numérique.</p></div>
+                    <div>
+                        <h4 class="font-mono text-xs text-slate-500 border-b border-slate-800 pb-2 mb-3">/// SKILL_MATRIX</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-slate-800 border border-slate-700 text-xs text-cyber-cyan font-mono hover:border-cyber-cyan transition-colors">APPS_SCRIPT</span>
+                            <span class="px-2 py-1 bg-slate-800 border border-slate-700 text-xs text-cyber-pink font-mono hover:border-cyber-pink transition-colors">REACT / JS</span>
+                            <span class="px-2 py-1 bg-slate-800 border border-slate-700 text-xs text-cyber-amber font-mono hover:border-cyber-amber transition-colors">DATA_ENG</span>
+                            <span class="px-2 py-1 bg-slate-800 border border-slate-700 text-xs text-emerald-400 font-mono hover:border-emerald-400 transition-colors">UI/UX</span>
+                            <span class="px-2 py-1 bg-slate-800 border border-slate-700 text-xs text-white font-mono hover:border-white transition-colors">GOOGLE_CLOUD</span>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex gap-4"><a href="mailto:anthony.senejoux@systeme-u.fr" target="_top" class="flex-1 text-center bg-cyber-cyan/10 hover:bg-cyber-cyan/20 border border-cyber-cyan text-cyber-cyan py-2 text-xs font-bold font-mono tracking-wider transition-all">CONTACT_PROTOCOL</a><a href="https://github.com/asenejoux" target="_blank" class="flex-1 text-center border border-slate-700 text-slate-400 hover:text-white hover:border-white py-2 text-xs font-bold font-mono tracking-wider transition-all">GITHUB_LINK</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT INCLUSION ORDER (CRITICAL) -->
+    <script>window.projectsData = [];</script>
+    
+    <!-- Data Modules -->
+    <?!= include('project_argus'); ?>
+    <?!= include('project_agora'); ?>
+    <?!= include('project_hermes'); ?>
+    <?!= include('project_praxis'); ?>
+    <?!= include('project_themis'); ?>
+    <?!= include('project_minerva'); ?>
+    <?!= include('project_demetra'); ?>
+    <?!= include('project_janus'); ?>
+    <?!= include('project_kairos'); ?>
+    <?!= include('project_nexus'); ?>
+    
+    <!-- Logic Modules -->
+    <?!= include('script_fx'); ?>
+    <?!= include('script_core'); ?>
+
+    <!-- CLOCK SCRIPT -->
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const clockEl = document.getElementById('system-clock');
+            if(clockEl) clockEl.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+
+</body>
+</html>

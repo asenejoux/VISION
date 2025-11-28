@@ -1,0 +1,54 @@
+<script>
+(function() {
+    window.projectsData.push({
+        id: "demetra",
+        title: "PROJET DEMETRA",
+        subtitle: "Gestion des Commandes & Flux Client",
+        theme: "theme-emerald", 
+        colorHex: "#10b981",
+        tags: ["Apps Script", "Google Forms", "PDF Gen", "Serverless"],
+        summary: "La Moisson de la Mer. Gestion du cycle de vie de la commande, de la semence (requête) à la récolte (livraison).",
+        content: [
+            {
+                type: "hero",
+                text: "DEMETRA : Enregistrement et Management Efficace des Transactions, Requêtes et Articles. Le maillon final qui distribue l'abondance."
+            },
+            {
+                type: "section",
+                title: "SYMBOLISME : LE CYCLE NATUREL",
+                body: "Déesse de l'agriculture et de la fertilité, Demetra incarne la 'Moisson de la Mer'. Elle gouverne le cycle complet de la commande : la <strong>Semence</strong> (Requête client), la <strong>Croissance</strong> (Traitement/Planification) et la <strong>Récolte</strong> (Préparation/Remise)."
+            },
+            {
+                type: "grid",
+                items: [
+                    { title: "SEMENCE", desc: "La commande brute capturée via Google Forms." },
+                    { title: "CROISSANCE", desc: "Organisation et transformation en ordre de production." },
+                    { title: "RÉCOLTE", desc: "Génération du BDC et remise au client." }
+                ]
+            },
+            {
+                type: "section",
+                title: "INTÉGRATION STRATÉGIQUE",
+                body: "Demetra est le pont vers le monde extérieur. Si Minerva planifie, Themis trace, Praxis fabrique et Hermes communique, Demetra assure que l'abondance créée en interne trouve son destinataire final."
+            },
+            {
+                type: "tech-stack",
+                items: ["Google Forms (Input)", "Apps Script (Moteur)", "Drive (Stockage)", "Exponential Backoff"]
+            },
+            {
+                type: "section",
+                title: "ARCHITECTURE SERVERLESS",
+                body: "Une application robuste gérant l'idempotence (génération unique par 'bloc' de commande) et la consolidation journalière (PDF multipages). Le système inclut une logique de maintenance avancée (nettoyage PDF orphelins, synchro bidirectionnelle Formulaire/Feuille)."
+            },
+            {
+                type: "grid",
+                items: [
+                    { title: "CONSOLIDATION", desc: "Regroupement intelligent des commandes par date/client." },
+                    { title: "ROBUSTESSE", desc: "Gestion des erreurs API (429) via temporisation exponentielle." },
+                    { title: "ARCHIVAGE", desc: "Historisation automatique des flux traités." }
+                ]
+            }
+        ]
+    });
+})();
+</script>

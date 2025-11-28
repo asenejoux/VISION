@@ -1,0 +1,222 @@
+<script>
+// ==========================================
+// 0. SYSTÈME AUDIO & VISUEL (FX ENGINE)
+// ==========================================
+
+class AudioSystem {
+    constructor() {
+        this.enabled = false;
+        this.ctx = null;
+        this.gainNode = null;
+    }
+
+    init() {
+        if (!this.ctx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioContext();
+            this.gainNode = this.ctx.createGain();
+            this.gainNode.connect(this.ctx.destination);
+        }
+        this.enabled = true;
+        this.updateUI(true);
+        this.playSfx('powerOn');
+    }
+
+    toggle() {
+        if (this.enabled) {
+            this.enabled = false;
+            this.updateUI(false);
+        } else {
+            this.init();
+        }
+    }
+
+    updateUI(isOn) {
+        const status = document.getElementById('audio-status');
+        const waves = document.getElementById('audio-waves');
+        if (status && waves) {
+            if (isOn) {
+                status.textContent = "ON";
+                status.classList.add('text-green-500');
+                waves.classList.remove('hidden');
+            } else {
+                status.textContent = "OFF";
+                status.classList.remove('text-green-500');
+                waves.classList.add('hidden');
+            }
+        }
+    }
+
+    playTone(freq, type, duration, vol = 0.05) {
+        if (!this.enabled || !this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + duration);
+    }
+
+    playSfx(type) {
+        if (!this.enabled) return;
+        // Génération procédurale de sons SFX
+        switch (type) {
+            case 'hover': 
+                this.playTone(800, 'sine', 0.03, 0.01); 
+                break;
+            case 'click': 
+                this.playTone(1200, 'square', 0.05, 0.02); 
+                this.playTone(600, 'triangle', 0.05, 0.02);
+                break;
+            case 'success': 
+                this.playTone(600, 'sine', 0.1, 0.05);
+                setTimeout(() => this.playTone(1200, 'sine', 0.2, 0.05), 100);
+                break;
+            case 'error': 
+                this.playTone(150, 'sawtooth', 0.2, 0.05);
+                setTimeout(() => this.playTone(100, 'sawtooth', 0.2, 0.05), 100);
+                break;
+            case 'type': 
+                // Son de frappe très court et aléatoire pour effet "Data Stream"
+                if(Math.random() > 0.7) this.playTone(800 + Math.random() * 400, 'square', 0.02, 0.005); 
+                break;
+            case 'powerOn':
+                this.playTone(200, 'sine', 0.5, 0.1);
+                setTimeout(() => this.playTone(400, 'sine', 0.5, 0.1), 200);
+                break;
+            case 'back':
+                this.playTone(400, 'triangle', 0.1, 0.05);
+                break;
+        }
+    }
+}
+
+// Instance globale accessible par script_core
+const audioSys = new AudioSystem();
+function toggleAudio() { audioSys.toggle(); }
+function playSfx(type) { audioSys.playSfx(type); }
+
+// --- EFFET DE DÉCRYPTAGE DE TEXTE ---
+class TextScramble {
+    constructor(el) {
+        this.el = el;
+        this.chars = '!<>-_\\/[]{}—=+*^?#________';
+        this.update = this.update.bind(this);
+    }
+    setText(newText) {
+        const oldText = this.el.innerText;
+        const length = Math.max(oldText.length, newText.length);
+        const promise = new Promise((resolve) => this.resolve = resolve);
+        this.queue = [];
+        for (let i = 0; i < length; i++) {
+            const from = oldText[i] || '';
+            const to = newText[i] || '';
+            const start = Math.floor(Math.random() * 40);
+            const end = start + Math.floor(Math.random() * 40);
+            this.queue.push({ from, to, start, end });
+        }
+        cancelAnimationFrame(this.frameRequest);
+        this.frame = 0;
+        this.update();
+        return promise;
+    }
+    update() {
+        let output = '';
+        let complete = 0;
+        for (let i = 0, n = this.queue.length; i < n; i++) {
+            let { from, to, start, end, char } = this.queue[i];
+            if (this.frame >= end) {
+                complete++;
+                output += to;
+            } else if (this.frame >= start) {
+                if (!char || Math.random() < 0.28) {
+                    char = this.randomChar();
+                    this.queue[i].char = char;
+                }
+                output += `<span class="text-cyber-cyan opacity-50">${char}</span>`;
+            } else {
+                output += from;
+            }
+        }
+        this.el.innerHTML = output;
+        if (complete === this.queue.length) {
+            this.resolve();
+        } else {
+            this.frameRequest = requestAnimationFrame(this.update);
+            this.frame++;
+        }
+    }
+    randomChar() {
+        return this.chars[Math.floor(Math.random() * this.chars.length)];
+    }
+}
+
+// --- PARTICLES BACKGROUND ---
+class ParticleNetwork {
+    constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        if(!this.canvas) return;
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.mouse = { x: null, y: null };
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        window.addEventListener('mousemove', (e) => {
+            this.mouse.x = e.x;
+            this.mouse.y = e.y;
+        });
+        this.initParticles();
+        this.animate();
+    }
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+    }
+    initParticles() {
+        const count = Math.min(window.innerWidth / 15, 80);
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                size: Math.random() * 2 + 0.5
+            });
+        }
+    }
+    animate() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.particles.forEach((p, i) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
+            if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
+            
+            this.ctx.fillStyle = 'rgba(0, 243, 255, 0.3)';
+            this.ctx.beginPath();
+            this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            if (this.mouse.x) {
+                const dx = this.mouse.x - p.x;
+                const dy = this.mouse.y - p.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 150) {
+                    this.ctx.strokeStyle = `rgba(0, 243, 255, ${0.4 * (1 - distance / 150)})`;
+                    this.ctx.lineWidth = 0.5;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p.x, p.y);
+                    this.ctx.lineTo(this.mouse.x, this.mouse.y);
+                    this.ctx.stroke();
+                }
+            }
+        });
+        requestAnimationFrame(() => this.animate());
+    }
+}
+window.addEventListener('load', () => new ParticleNetwork('neural-canvas'));
+</script>
