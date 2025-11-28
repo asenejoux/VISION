@@ -3,52 +3,40 @@
     window.projectsData.push({
         id: "praxis",
         title: "PROJET PRAXIS",
-        subtitle: "Gestion de Production & Workflow",
+        subtitle: "Production & Transformation",
         theme: "theme-rose", 
         colorHex: "#f43f5e",
-        tags: ["Apps Script", "Production", "SPA", "Costing"],
-        summary: "L'Action informée par la Théorie. Le moteur qui transforme les ressources brutes (Themis) en valeur ajoutée.",
-        content: [
-            {
-                type: "hero",
-                text: "PRAXIS : L'Action, la Pratique, la Transformation. Le bras armé qui transforme le potentiel en réalité."
-            },
-            {
-                type: "section",
-                title: "SYNERGIE PHILOSOPHIQUE",
-                body: "Le choix du nom repose sur une dualité fondatrice. Si <strong>THEMIS</strong> est l'épistémè (la théorie, la règle, le stock), <strong>PRAXIS</strong> est le moteur qui utilise cette connaissance pour agir. C'est la danse entre la donnée et l'action, le savoir et le faire."
-            },
-            {
-                type: "grid",
-                items: [
-                    { title: "THEMIS", desc: "La Théorie. 'De quoi disposons-nous ?' (Stocks, Règles)." },
-                    { title: "PRAXIS", desc: "La Pratique. 'Que faisons-nous ?' (Production, Transformation)." },
-                    { title: "VALEUR", desc: "Transformation des matières premières en produits finis." }
-                ]
-            },
-            {
-                type: "section",
-                title: "CŒUR DU SYSTÈME : LES RECETTES",
-                body: "Gestion avancée des fiches techniques enrichies (Images Drive, DLC, Allergènes). L'intelligence réside dans l'<strong>Analyse de Rentabilité</strong> : calcul automatique du coût de revient et de la marge brute en temps réel, avec ajustement dynamique selon le conditionnement."
-            },
-            {
-                type: "tech-stack",
-                items: ["Apps Script V8", "LockService", "API Router", "Tailwind CSS"]
-            },
-            {
-                type: "section",
-                title: "GESTION DE LA PRODUCTION",
-                body: "Planification via des <strong>Ordres de Fabrication (OF)</strong> et génération automatique des besoins consolidés ('Liste de courses'). L'architecture assure une résilience maximale (Backoff exponentiel) et une intégrité des données (LockService) lors des écritures concurrentes."
-            },
-            {
-                type: "grid",
-                items: [
-                    { title: "DOCUMENTATION", desc: "Contenu dynamique piloté par Google Docs." },
-                    { title: "SÉCURITÉ", desc: "Interface adaptative selon le rôle (Admin/Opérateur)." },
-                    { title: "EXPORT", desc: "Fiches techniques PDF & Livre de recettes HTML." }
-                ]
-            }
-        ]
+        tags: ["Production", "Transformation", "Action", "Costing"],
+        summary: "L'Action informée par la Théorie. Le moteur qui transforme les ressources (Themis) en valeur ajoutée.",
+        
+        mythology: {
+            title: "PRAXIS",
+            text: "Concept philosophique désignant l'action concrète et la mise en pratique, par opposition à la théorie. C'est le processus par lequel une idée devient réalité tangible.",
+            meaning: "Action & Réalisation"
+        },
+        
+        analogy: {
+            intro: "La synergie intellectuelle entre THEMIS (Théorie) et PRAXIS (Pratique) est le fondement du système.",
+            cards: [
+                { title: "SYNERGIE", text: "Themis fournit la règle et le stock ('De quoi disposons-nous ?'). Praxis exécute ('Que faisons-nous ?')." },
+                { title: "TRANSFORMATION", text: "L'alchimie qui change la matière première en produit fini via des recettes." },
+                { title: "VALEUR", text: "Le bras armé qui génère concrètement la rentabilité et le produit." }
+            ]
+        },
+        
+        branding: {
+            cards: [
+                { title: "ACTION", text: "Mise en œuvre." },
+                { title: "RECETTE", text: "Savoir-faire codifié." },
+                { title: "FAB", text: "Ordres de fabrication." },
+                { title: "MOTEUR", text: "Cœur productif." }
+            ]
+        },
+        
+        tech: {
+            text: "Moteur de calcul de coûts (Costing) et gestionnaire d'Ordres de Fabrication (OF). Consomme les données de Themis pour piloter la production.",
+            stack: ["Engine: Manufacturing", "Data: Recipe Logic", "Fin: Real-time Costing", "Link: Themis Consumer"]
+        }
     });
 })();
 </script>

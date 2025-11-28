@@ -6,49 +6,67 @@
         subtitle: "Event & Rendez-vous Matching Engine",
         theme: "theme-emerald", 
         colorHex: "#10b981",
-        tags: ["Apps Script", "Algorithm", "Google Calendar", "PDF Gen"],
-        summary: "Système nerveux central de l'événementiel. Orchestration automatisée et intelligente des rendez-vous B2B.",
-        content: [
+        tags: ["SPA Architecture", "Algorithme", "Google Calendar Sync", "PDF Factory"],
+        summary: "Le Système Nerveux Central de l'événement. Une application web de pilotage complète transformant la planification complexe en un processus automatisé.",
+        
+        mythology: {
+            title: "HERMÈS & L'ACRONYME",
+            text: "Double signification : Référence au dieu grec du commerce et de la communication, facilitateur des échanges. C'est aussi un acronyme récursif technique : 'HERMES : Event & Rendez-vous Matching Engine System', soulignant sa nature de moteur système.",
+            meaning: "Commerce, Communication & Système"
+        },
+        
+        analogy: {
+            intro: "Plus qu'un outil, HERMES agit comme le système nerveux central de l'événement.",
+            cards: [
+                { title: "LE CERVEAU", text: "Panneau de Contrôle unique. Une SPA réactive pilotant tout le workflow sans rechargement de page." },
+                { title: "LES SYNAPSES", text: "Le moteur de matching. Il connecte l'offre et la demande via un algorithme de 'Double Équilibrage de Charge'." },
+                { title: "LA MÉMOIRE", text: "Synchronisation Idempotente. Le système assure une cohérence parfaite entre la Base de Données et l'Agenda Réel." }
+            ]
+        },
+        
+        workflow: [
             {
-                type: "hero",
-                text: "HERMES : Event & Rendez-vous Matching Engine System. Le messager divin au service de la performance commerciale."
+                title: "PHASE 1 : PRÉPARATION",
+                phase: "INPUT & DATA",
+                text: "Lancement de la campagne d'invitation et génération automatisée des badges PDF. Le système détecte les changements et ne met à jour que le nécessaire (Diff Check)."
             },
             {
-                type: "section",
-                title: "DOUBLE SIGNIFICATION",
-                body: "Un acronyme récursif technique allié à une référence mythologique forte. Comme le dieu grec du commerce et des voyageurs, l'application franchit les frontières pour connecter fournisseurs et points de vente, agissant comme un messager fiable et ingénieux."
+                title: "PHASE 2 : PLANIFICATION",
+                phase: "CORE ENGINE",
+                text: "Exécution du 'Worker' algorithmique. Double équilibrage de charge (priorité aux moins chargés) et correspondance par pertinence en 3 passes (Secteur > Hiérarchie > Joker)."
             },
             {
-                type: "grid",
-                items: [
-                    { title: "CONNECTER", desc: "Faciliter la rencontre entre deux groupes distincts." },
-                    { title: "ORCHESTRER", desc: "Automatiser invitations, rappels et documents." },
-                    { title: "OPTIMISER", desc: "Algorithme de matching pour des échanges productifs." }
-                ]
+                title: "PHASE 3 : EXÉCUTION",
+                phase: "SYNC & LIVE",
+                text: "Transformation du plan en événements Google Calendar réels. Logique idempotente (anti-doublon) et gestion bidirectionnelle des statuts (Oui/Non/Annulé)."
             },
             {
-                type: "section",
-                title: "ARCHITECTURE SPA",
-                body: "Une application web moderne séparant le Frontend (HTML/Tailwind) réactif du Backend (Apps Script) 'muet'. L'interface unifiée regroupe Panneau de Contrôle, Tableau de Bord et Documentation sans rechargement de page."
-            },
-            {
-                type: "section",
-                title: "ALGORITHME DE PLACEMENT",
-                body: "Le cœur du système. Un moteur de <strong>Double Équilibrage de Charge</strong> priorise les moins chargés, tandis qu'une <strong>Correspondance par Pertinence</strong> en trois passes (Secteur, Hiérarchie, Joker) assure la qualité des RDV, tout en respectant contraintes et blacklists."
-            },
-            {
-                type: "grid",
-                items: [
-                    { title: "PHASE 1", desc: "Publipostage & Génération auto de Badges PDF." },
-                    { title: "PHASE 2", desc: "Matching intelligent & Création Planning." },
-                    { title: "PHASE 3", desc: "Sync Google Calendar idempotente & Reporting." }
-                ]
-            },
-            {
-                type: "tech-stack",
-                items: ["Google Apps Script", "Google Calendar API", "Algorithme de Tri", "Génération PDF"]
+                title: "PHASE 4 : REPORTING",
+                phase: "OUTPUT",
+                text: "Génération massive de documents (Feuilles de route, Chevalets, Cahiers PDF) et communication ciblée post-événement."
             }
-        ]
+        ],
+
+        features: [
+            { title: "Architecture SPA", text: "Frontend Tailwind/JS réactif découplé d'un Backend GAS 'muet'." },
+            { title: "Double Équilibrage", text: "Algorithme assurant une répartition équitable des RDV." },
+            { title: "Sync Idempotente", text: "Mise à jour Calendar non-destructive (Patchs)." },
+            { title: "Robustesse Async", text: "Gestion des timeouts et reprise sur erreur." }
+        ],
+        
+        branding: {
+            cards: [
+                { title: "SPA", text: "Interface Unifiée." },
+                { title: "MATCH", text: "Pertinence & Équité." },
+                { title: "SYNC", text: "Agenda Fiable." },
+                { title: "DOCS", text: "Usine à PDF." }
+            ]
+        },
+        
+        tech: {
+            text: "Développé comme une Single-Page Application (SPA) robuste. Le Frontend offre une expérience utilisateur fluide (Panneau de Contrôle, Dashboard) tandis que le Backend exécute la logique lourde de manière asynchrone.",
+            stack: ["Arch: SPA / Backend Muet", "Algo: Double Load Balancing", "Sync: Google Calendar API", "Out: Mass PDF Generation"]
+        }
     });
 })();
 </script>

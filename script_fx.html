@@ -63,7 +63,6 @@ class AudioSystem {
 
     playSfx(type) {
         if (!this.enabled) return;
-        // Génération procédurale de sons SFX
         switch (type) {
             case 'hover': 
                 this.playTone(800, 'sine', 0.03, 0.01); 
@@ -81,7 +80,6 @@ class AudioSystem {
                 setTimeout(() => this.playTone(100, 'sawtooth', 0.2, 0.05), 100);
                 break;
             case 'type': 
-                // Son de frappe très court et aléatoire pour effet "Data Stream"
                 if(Math.random() > 0.7) this.playTone(800 + Math.random() * 400, 'square', 0.02, 0.005); 
                 break;
             case 'powerOn':

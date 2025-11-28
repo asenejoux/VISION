@@ -3,52 +3,40 @@
     window.projectsData.push({
         id: "demetra",
         title: "PROJET DEMETRA",
-        subtitle: "Gestion des Commandes & Flux Client",
+        subtitle: "Gestion des Transactions & Requêtes",
         theme: "theme-emerald", 
         colorHex: "#10b981",
-        tags: ["Apps Script", "Google Forms", "PDF Gen", "Serverless"],
-        summary: "La Moisson de la Mer. Gestion du cycle de vie de la commande, de la semence (requête) à la récolte (livraison).",
-        content: [
-            {
-                type: "hero",
-                text: "DEMETRA : Enregistrement et Management Efficace des Transactions, Requêtes et Articles. Le maillon final qui distribue l'abondance."
-            },
-            {
-                type: "section",
-                title: "SYMBOLISME : LE CYCLE NATUREL",
-                body: "Déesse de l'agriculture et de la fertilité, Demetra incarne la 'Moisson de la Mer'. Elle gouverne le cycle complet de la commande : la <strong>Semence</strong> (Requête client), la <strong>Croissance</strong> (Traitement/Planification) et la <strong>Récolte</strong> (Préparation/Remise)."
-            },
-            {
-                type: "grid",
-                items: [
-                    { title: "SEMENCE", desc: "La commande brute capturée via Google Forms." },
-                    { title: "CROISSANCE", desc: "Organisation et transformation en ordre de production." },
-                    { title: "RÉCOLTE", desc: "Génération du BDC et remise au client." }
-                ]
-            },
-            {
-                type: "section",
-                title: "INTÉGRATION STRATÉGIQUE",
-                body: "Demetra est le pont vers le monde extérieur. Si Minerva planifie, Themis trace, Praxis fabrique et Hermes communique, Demetra assure que l'abondance créée en interne trouve son destinataire final."
-            },
-            {
-                type: "tech-stack",
-                items: ["Google Forms (Input)", "Apps Script (Moteur)", "Drive (Stockage)", "Exponential Backoff"]
-            },
-            {
-                type: "section",
-                title: "ARCHITECTURE SERVERLESS",
-                body: "Une application robuste gérant l'idempotence (génération unique par 'bloc' de commande) et la consolidation journalière (PDF multipages). Le système inclut une logique de maintenance avancée (nettoyage PDF orphelins, synchro bidirectionnelle Formulaire/Feuille)."
-            },
-            {
-                type: "grid",
-                items: [
-                    { title: "CONSOLIDATION", desc: "Regroupement intelligent des commandes par date/client." },
-                    { title: "ROBUSTESSE", desc: "Gestion des erreurs API (429) via temporisation exponentielle." },
-                    { title: "ARCHIVAGE", desc: "Historisation automatique des flux traités." }
-                ]
-            }
-        ]
+        tags: ["Order Management", "Cycle", "Automation", "Input"],
+        summary: "La Moisson de la Mer. Gestion du cycle de vie de la commande, de la semence à la récolte.",
+        
+        mythology: {
+            title: "DÉMÉTER",
+            text: "Déesse de l'agriculture et des moissons. Elle symbolise l'abondance et le cycle vital. Elle incarne la 'Moisson de la Mer' et la capacité de pourvoir aux besoins.",
+            meaning: "Ressource & Cycle"
+        },
+        
+        analogy: {
+            intro: "Demetra gouverne le cycle naturel de la commande, assurant que l'abondance trouve son destinataire.",
+            cards: [
+                { title: "SEMENCE", text: "La requête client brute, capturée et accueillie par le système." },
+                { title: "CROISSANCE", text: "Le traitement, l'organisation et la préparation de l'ordre." },
+                { title: "RÉCOLTE", text: "La remise finale au client, satisfaisant le besoin initial." }
+            ]
+        },
+        
+        branding: {
+            cards: [
+                { title: "TRANSAC", text: "Gestion des commandes." },
+                { title: "REQUÊTE", text: "Écoute du besoin." },
+                { title: "ARTICLE", text: "Maîtrise du produit." },
+                { title: "EFFICACE", text: "Management fluide." }
+            ]
+        },
+        
+        tech: {
+            text: "Système de capture (Forms) et de consolidation. Intégration stratégique en fin de chaîne pour distribuer la valeur créée par Praxis.",
+            stack: ["Input: Smart Forms", "Process: Order Consolidation", "Output: Delivery Docs", "Link: Customer Interface"]
+        }
     });
 })();
 </script>
