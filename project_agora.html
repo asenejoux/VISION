@@ -3,40 +3,57 @@
     window.projectsData.push({
         id: "agora-u",
         title: "PROJET AGORA",
-        subtitle: "Place de Marché Numérique",
+        subtitle: "Application de Ventes Privées",
         theme: "theme-amber",
         colorHex: "#f59e0b",
-        tags: ["Marketplace", "Ventes Privées", "Real-Time", "Community"],
-        summary: "Le cœur battant du réseau. Une place de marché numérique exclusive où l'offre et la demande se rencontrent.",
-        
-        mythology: {
-            title: "L'AGORA GRECQUE",
-            text: "Cœur battant de la cité antique, à la fois centre commercial (lieu de transaction) et hub social (lieu d'information). C'est là que les décisions se prenaient et que la vie circulait.",
-            meaning: "Commerce & Communauté"
-        },
-        
-        analogy: {
-            intro: "L'analogie correspond point par point à la fonctionnalité de Ventes Privées V2.",
-            cards: [
-                { title: "MARKETPLACE", text: "L'Admin (Marchand) présente ses offres, les Acheteurs consultent et transactent sur une place centrale." },
-                { title: "POULS DU MARCHÉ", text: "Graphiques, stocks et statuts ('Ouverte') sont les informations temps réel visibles par tous." },
-                { title: "CERCLE PRIVÉ", text: "Un environnement contrôlé et exclusif, réservé aux membres identifiés du réseau." }
-            ]
-        },
-        
-        branding: {
-            cards: [
-                { title: "COMMERCE", text: "Transactions fluides." },
-                { title: "INFO", text: "Hub d'actualité live." },
-                { title: "EXCLUSIF", text: "Accès sécurisé réseau." },
-                { title: "MODERNE", text: "Digitalisation totale." }
-            ]
-        },
-        
-        tech: {
-            text: "Une architecture SPA simulant un marché boursier. Gestion de la concurrence d'accès (Stocks) et diffusion instantanée de l'information (Statuts).",
-            stack: ["Frontend: Reactive JS", "Backend: Apps Script", "DB: Transactional Sheets", "UX: Live Dashboard"]
-        }
+        tags: ["Web App", "Google Workspace", "SPA", "Tailwind"],
+        summary: "Digitalisation du cycle de vente. Une place de marché numérique exclusive, temps réel et automatisée.",
+        content: [
+            {
+                type: "hero",
+                text: "PROJET AGORA : Puiser l'inspiration dans l'histoire pour nommer un outil résolument moderne."
+            },
+            {
+                type: "section",
+                title: "SYMBOLISME & HÉRITAGE",
+                body: "Dans la Grèce antique, l'agora était le cœur battant de la cité, à la fois <strong>Centre Commercial</strong> (lieu de transaction) et <strong>Hub Social</strong> (lieu d'information). Ce nom incarne parfaitement la mission de la plateforme : être le lieu unique où l'offre et la demande se rencontrent dans un environnement contrôlé."
+            },
+            {
+                type: "grid",
+                items: [
+                    { title: "PLACE DE MARCHÉ", desc: "L'Admin présente ses offres, les Acheteurs transactent." },
+                    { title: "TEMPS RÉEL", desc: "Le 'pouls' du marché (Stocks, Graphiques) visible par tous." },
+                    { title: "EXCLUSIF", desc: "Environnement privé et sécurisé, réservé au réseau." }
+                ]
+            },
+            {
+                type: "section",
+                title: "ARCHITECTURE HYBRIDE",
+                body: "Une Single-Page Application (SPA) fluide connectée à la puissance de Google Workspace. Le Backend (Apps Script) gère la logique lourde et la sécurité, tandis que Google Sheets sert de base de données flexible."
+            },
+            {
+                type: "tech-stack",
+                items: ["Frontend: Vanilla JS + Tailwind", "Backend: Apps Script", "DB: Google Sheets", "Gen: PDF Service"]
+            },
+            {
+                type: "section",
+                title: "EXPÉRIENCE UTILISATEUR (UX)",
+                body: "Une interface divisée en deux mondes. Le <strong>Lobby</strong> (Timeline verticale, filtres instantanés, refresh 10s) pour la découverte, et la <strong>Salle de Vente</strong> (Stock live 5s, Dataviz parts de marché) pour l'action."
+            },
+            {
+                type: "grid",
+                items: [
+                    { title: "ACHETEUR", desc: "Accès par Code PIN. Visualisation stock & promos." },
+                    { title: "ADMIN", desc: "Dashboard de pilotage & Actions de masse (Emails, BDC)." },
+                    { title: "DATAVIZ", desc: "Histogrammes dynamiques & Donut charts." }
+                ]
+            },
+            {
+                type: "section",
+                title: "INTELLIGENCE BACKEND",
+                body: "Le cœur du système réside dans ses automatismes : Génération de Bons de Commande PDF dynamiques (taille illimitée), auto-création de l'arborescence Drive et écriture en masse (Batch Write) pour des performances optimales."
+            }
+        ]
     });
 })();
 </script>

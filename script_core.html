@@ -1,7 +1,236 @@
 <script>
-// ==========================================
-// 1. LOGIQUE D'AUTHENTIFICATION
-// ==========================================
+/**
+ * ==========================================
+ * PARTIE 1 : MOTEUR FX (AUDIO & VISUEL)
+ * Nécessaire pour que playSfx et les particules fonctionnent
+ * ==========================================
+ */
+
+class AudioSystem {
+    constructor() {
+        this.enabled = false;
+        this.ctx = null;
+        this.gainNode = null;
+    }
+
+    init() {
+        if (!this.ctx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioContext();
+            this.gainNode = this.ctx.createGain();
+            this.gainNode.connect(this.ctx.destination);
+        }
+        this.enabled = true;
+        this.updateUI(true);
+        // Petit son d'initialisation
+        this.playSfx('powerOn');
+    }
+
+    toggle() {
+        if (this.enabled) {
+            this.enabled = false;
+            this.updateUI(false);
+        } else {
+            this.init();
+        }
+    }
+
+    updateUI(isOn) {
+        const status = document.getElementById('audio-status');
+        const waves = document.getElementById('audio-waves');
+        if (status && waves) {
+            if (isOn) {
+                status.textContent = "ON";
+                status.classList.add('text-green-500');
+                waves.classList.remove('hidden');
+            } else {
+                status.textContent = "OFF";
+                status.classList.remove('text-green-500');
+                waves.classList.add('hidden');
+            }
+        }
+    }
+
+    playTone(freq, type, duration, vol = 0.05) {
+        if (!this.enabled || !this.ctx) return;
+        try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + duration);
+        } catch(e) { console.warn(e); }
+    }
+
+    playSfx(type) {
+        if (!this.enabled) return;
+        switch (type) {
+            case 'hover': this.playTone(800, 'sine', 0.03, 0.01); break;
+            case 'click': 
+                this.playTone(1200, 'square', 0.05, 0.02); 
+                this.playTone(600, 'triangle', 0.05, 0.02);
+                break;
+            case 'success': 
+                this.playTone(600, 'sine', 0.1, 0.05);
+                setTimeout(() => this.playTone(1200, 'sine', 0.2, 0.05), 100);
+                break;
+            case 'error': 
+                this.playTone(150, 'sawtooth', 0.2, 0.05);
+                setTimeout(() => this.playTone(100, 'sawtooth', 0.2, 0.05), 100);
+                break;
+            case 'type': 
+                if(Math.random() > 0.7) this.playTone(800 + Math.random() * 400, 'square', 0.02, 0.005); 
+                break;
+            case 'powerOn':
+                this.playTone(200, 'sine', 0.5, 0.1);
+                setTimeout(() => this.playTone(400, 'sine', 0.5, 0.1), 200);
+                break;
+            case 'back':
+                this.playTone(400, 'triangle', 0.1, 0.05);
+                break;
+        }
+    }
+}
+
+// Helpers Globaux
+const audioSys = new AudioSystem();
+window.toggleAudio = function() { audioSys.toggle(); };
+window.playSfx = function(type) { audioSys.playSfx(type); };
+
+
+// --- EFFET DE DÉCRYPTAGE DE TEXTE ---
+class TextScramble {
+    constructor(el) {
+        this.el = el;
+        this.chars = '!<>-_\\/[]{}—=+*^?#________';
+        this.update = this.update.bind(this);
+    }
+    setText(newText) {
+        const oldText = this.el.innerText;
+        const length = Math.max(oldText.length, newText.length);
+        const promise = new Promise((resolve) => this.resolve = resolve);
+        this.queue = [];
+        for (let i = 0; i < length; i++) {
+            const from = oldText[i] || '';
+            const to = newText[i] || '';
+            const start = Math.floor(Math.random() * 80);
+            const end = start + Math.floor(Math.random() * 80);
+            this.queue.push({ from, to, start, end });
+        }
+        cancelAnimationFrame(this.frameRequest);
+        this.frame = 0;
+        this.update();
+        return promise;
+    }
+    update() {
+        let output = '';
+        let complete = 0;
+        for (let i = 0, n = this.queue.length; i < n; i++) {
+            let { from, to, start, end, char } = this.queue[i];
+            if (this.frame >= end) {
+                complete++;
+                output += to;
+            } else if (this.frame >= start) {
+                if (!char || Math.random() < 0.28) {
+                    char = this.randomChar();
+                    this.queue[i].char = char;
+                }
+                output += `<span class="text-cyber-cyan opacity-50">${char}</span>`;
+            } else {
+                output += from;
+            }
+        }
+        this.el.innerHTML = output;
+        if (complete === this.queue.length) {
+            this.resolve();
+        } else {
+            this.frameRequest = requestAnimationFrame(this.update);
+            this.frame++;
+        }
+    }
+    randomChar() {
+        return this.chars[Math.floor(Math.random() * this.chars.length)];
+    }
+}
+window.TextScramble = TextScramble;
+
+// --- PARTICLES BACKGROUND ---
+class ParticleNetwork {
+    constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        if(!this.canvas) return;
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.mouse = { x: null, y: null };
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        window.addEventListener('mousemove', (e) => {
+            this.mouse.x = e.x;
+            this.mouse.y = e.y;
+        });
+        this.initParticles();
+        this.animate();
+    }
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+    }
+    initParticles() {
+        const count = Math.min(window.innerWidth / 15, 80);
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                size: Math.random() * 2 + 0.5
+            });
+        }
+    }
+    animate() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.particles.forEach((p) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
+            if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
+            
+            this.ctx.fillStyle = 'rgba(0, 243, 255, 0.3)';
+            this.ctx.beginPath();
+            this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            if (this.mouse.x) {
+                const dx = this.mouse.x - p.x;
+                const dy = this.mouse.y - p.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 150) {
+                    this.ctx.strokeStyle = `rgba(0, 243, 255, ${0.4 * (1 - distance / 150)})`;
+                    this.ctx.lineWidth = 0.5;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p.x, p.y);
+                    this.ctx.lineTo(this.mouse.x, this.mouse.y);
+                    this.ctx.stroke();
+                }
+            }
+        });
+        requestAnimationFrame(() => this.animate());
+    }
+}
+window.addEventListener('load', () => new ParticleNetwork('neural-canvas'));
+
+
+/**
+ * ==========================================
+ * PARTIE 2 : LOGIQUE APPLICATIVE
+ * Authentification, Navigation, Rendu
+ * ==========================================
+ */
 
 const loginScreen = document.getElementById('login-screen');
 const appContainer = document.getElementById('app-container');
@@ -10,12 +239,8 @@ const loginStatus = document.getElementById('login-status');
 const loginBtn = document.getElementById('login-btn');
 const userBadge = document.getElementById('user-badge');
 
-// Gestion de la touche Entrée
-function handleLoginKey(event) { 
-    if (event.key === 'Enter') attemptLogin(); 
-}
+function handleLoginKey(event) { if (event.key === 'Enter') attemptLogin(); }
 
-// Tentative de connexion
 function attemptLogin() {
     const code = loginInput.value;
     if (!code) return;
@@ -32,7 +257,6 @@ function attemptLogin() {
         .verifyAccess(code);
 }
 
-// Succès de connexion
 function onLoginSuccess(response) {
     if (response.success) {
         if(typeof playSfx === 'function') playSfx('success');
@@ -45,8 +269,7 @@ function onLoginSuccess(response) {
             loginScreen.style.pointerEvents = 'none';
             appContainer.classList.remove('hidden-view');
             document.body.style.overflow = 'auto';
-            
-            // Initialisation différée
+            // Initialisation différée pour être sûr que le DOM est prêt
             setTimeout(() => {
                 if(portfolioGrid.innerHTML === "") initPortfolio();
             }, 100);
@@ -56,7 +279,6 @@ function onLoginSuccess(response) {
     }
 }
 
-// Échec de connexion
 function onLoginFailure() {
     if(typeof playSfx === 'function') playSfx('error');
     loginStatus.textContent = "ACCESS_DENIED // INVALID_TOKEN";
@@ -71,7 +293,7 @@ function onLoginFailure() {
 
 
 // ==========================================
-// 2. MOTEUR D'AFFICHAGE & NAVIGATION
+// MOTEUR D'AFFICHAGE & NAVIGATION
 // ==========================================
 
 const portfolioGrid = document.getElementById('portfolio-grid');
@@ -79,7 +301,7 @@ const projectDetail = document.getElementById('project-detail');
 const detailContainer = document.getElementById('detail-content');
 const backButton = document.getElementById('back-btn');
 
-// Fonction globale de retour
+// Fonction globale de retour (Accessible depuis le HTML)
 window.returnToLobby = function() {
     if(typeof playSfx === 'function') playSfx('back');
     
@@ -91,9 +313,11 @@ window.returnToLobby = function() {
     mainLobby.classList.remove('hidden-view');
     mainLobby.classList.add('fade-in');
     
+    // Reset du scroll
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
+// Attachement de l'événement au bouton physique
 if(backButton) {
     backButton.addEventListener('click', window.returnToLobby);
 }
@@ -163,62 +387,69 @@ function renderGrid(projects) {
     }, 200);
 }
 
-// === GÉNÉRATEUR DE TEMPLATE V3 (INTEGRATED) ===
+// === CŒUR DU SYSTÈME : GÉNÉRATEUR DE TEMPLATE V2 ===
 window.openProject = function(id) {
     if(typeof playSfx === 'function') playSfx('click');
     const project = window.projectsData.find(p => p.id === id);
     if (!project) return;
 
+    // Transition
     document.getElementById('main-lobby').classList.add('hidden-view');
-    const projectDetail = document.getElementById('project-detail');
     projectDetail.classList.remove('hidden-view');
     window.scrollTo(0,0);
 
-    const detailContainer = document.getElementById('detail-content');
+    // Injection CSS dynamique
     detailContainer.style.setProperty('--theme-color', project.colorHex);
-    document.title = `SYSTEM // ${project.id.toUpperCase()}`;
 
+    // Construction HTML Sécurisée
     let html = `
         <header class="min-h-[60vh] flex flex-col justify-center relative mb-24 reveal-item opacity-0 transform translate-y-4 transition-all duration-700">
-            <div class="absolute top-0 right-0 p-4 border border-[var(--theme-color)]/30 rounded text-right bg-slate-900/50 backdrop-blur">
-                <div class="text-xs font-mono" style="color: var(--theme-color)">STATUS: DEPLOYED</div>
+            <div class="absolute top-0 right-0 p-4 border border-[${project.colorHex}]/30 rounded text-right">
+                <div class="text-xs font-mono" style="color: ${project.colorHex}">PROJECT STATUS: DEPLOYED</div>
                 <div class="text-xs text-slate-500 font-mono">ID: ${project.id.toUpperCase()}</div>
             </div>
+
             <div class="mb-6 inline-block">
-                <span class="bg-[var(--theme-color)]/10 border px-3 py-1 rounded text-xs tracking-[0.2em] font-mono" style="color: var(--theme-color); border-color: var(--theme-color)">
-                    ${project.tags[0].toUpperCase()}
-                </span>
+                <span class="bg-[${project.colorHex}]/10 border px-3 py-1 rounded text-xs tracking-[0.2em] font-mono" style="color: ${project.colorHex}; border-color: ${project.colorHex}50">${project.tags[0].toUpperCase()}</span>
             </div>
-            <h1 class="text-5xl md:text-7xl lg:text-8xl font-display font-black text-white mb-6 tracking-tighter leading-none" id="detail-title"></h1>
-            <h2 class="text-xl md:text-3xl font-light tracking-widest mb-8 uppercase font-display flex items-center gap-4">
-                <span class="w-8 h-[2px]" style="background-color: var(--theme-color)"></span>
-                <span style="color: var(--theme-color)">${project.subtitle}</span>
+            
+            <h1 class="text-6xl md:text-8xl font-display font-black text-white mb-4 tracking-tighter" id="detail-title"></h1>
+            
+            <h2 class="text-xl md:text-3xl font-light tracking-widest mb-8 uppercase font-display" style="color: ${project.colorHex}">
+                ${project.subtitle}
             </h2>
-            <p class="text-slate-400 text-lg md:text-xl max-w-3xl leading-relaxed border-l-4 pl-6" style="border-color: var(--theme-color)">${project.summary}</p>
+            
+            <p class="text-slate-400 text-lg max-w-2xl border-l-2 pl-6 leading-relaxed" style="border-color: ${project.colorHex}">
+                ${project.summary}
+            </p>
         </header>
     `;
 
+    // SECTION 0: MYTHOLOGIE (Si disponible)
     if (project.mythology) {
         html += `
-        <section class="mb-32 relative reveal-item opacity-0 transform translate-y-4 transition-all duration-700 delay-100">
-            <div class="flex items-end gap-4 mb-12 border-b border-slate-800 pb-4">
-                <span class="text-6xl font-black text-slate-800/50 font-display -mb-2">00</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-white uppercase tracking-wide font-display">Origine <span style="color: var(--theme-color)">Codée</span></h2>
+        <section class="mb-32 relative reveal-item opacity-0 transform translate-y-4 transition-all duration-700">
+            <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full blur-3xl pointer-events-none opacity-20" style="background-color: ${project.colorHex}"></div>
+            <div class="flex items-center gap-4 mb-12 border-b border-slate-800 pb-4">
+                <span class="text-4xl font-bold text-slate-700 font-display">00</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-white uppercase tracking-wide font-display">Origine du <span style="color: ${project.colorHex}">Nom</span></h2>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="cyber-border p-8 bg-slate-900/50 backdrop-blur relative group">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-[var(--theme-color)] to-transparent opacity-20 blur group-hover:opacity-40 transition-opacity"></div>
-                    <div class="relative">
-                        <div class="text-xs mb-2 font-mono" style="color: var(--theme-color)">/// ARCHIVE_MYTHOS</div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <div class="lg:col-span-5 flex flex-col justify-center">
+                    <div class="cyber-border p-8 bg-slate-900/80">
+                        <div class="text-xs mb-2 font-mono" style="color: ${project.colorHex}">ARCHIVE HISTORIQUE</div>
                         <h3 class="text-3xl font-bold text-white mb-4 font-display">${project.mythology.title}</h3>
-                        <p class="text-slate-400 leading-relaxed text-sm text-justify">${project.mythology.text}</p>
+                        <p class="text-slate-400 leading-relaxed text-sm">${project.mythology.text}</p>
                     </div>
                 </div>
-                <div class="space-y-6">
-                    <div class="flex items-start gap-4 p-4 border-l-2" style="border-color: var(--theme-color)">
-                        <div class="text-4xl">🏛️</div>
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="flex items-start gap-4 bg-slate-900/50 p-6 border-l-2 hover:bg-slate-800/50 transition-colors" style="border-color: ${project.colorHex}">
+                        <div class="p-3 rounded border" style="color: ${project.colorHex}; background-color: ${project.colorHex}10; border-color: ${project.colorHex}20">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                        </div>
                         <div>
-                            <strong class="text-white text-lg block mb-1 font-display">SIGNIFICATION</strong>
+                            <strong class="text-white text-xl block mb-1 font-display">SIGNIFICATION</strong>
                             <p class="text-sm text-slate-400">${project.mythology.meaning}</p>
                         </div>
                     </div>
@@ -227,20 +458,22 @@ window.openProject = function(id) {
         </section>`;
     }
 
+    // SECTION 1: ANALOGIE (Si disponible)
     if (project.analogy) {
         html += `
-        <section class="mb-32 reveal-item opacity-0 transform translate-y-4 transition-all duration-700 delay-200">
-            <div class="flex items-end gap-4 mb-12 border-b border-slate-800 pb-4">
-                <span class="text-6xl font-black text-slate-800/50 font-display -mb-2">01</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-white uppercase tracking-wide font-display">Analogie <span style="color: var(--theme-color)">Système</span></h2>
+        <section class="mb-32 reveal-item opacity-0 transform translate-y-4 transition-all duration-700">
+            <div class="flex items-center gap-4 mb-12 border-b border-slate-800 pb-4">
+                <span class="text-4xl font-bold text-slate-700 font-display">01</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-white uppercase tracking-wide font-display">L'Analogie <span style="color: ${project.colorHex}">Système</span></h2>
             </div>
+            <p class="text-lg text-slate-400 mb-8 max-w-3xl">${project.analogy.intro}</p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 ${project.analogy.cards.map((card, i) => `
-                <div class="cyber-card p-6 pt-12 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-2 text-8xl font-black text-slate-800/20 font-display -mr-4 -mt-4 transition-transform group-hover:scale-110">0${i+1}</div>
+                <div class="cyber-card p-6 pt-10 group" onmouseenter="if(typeof playSfx === 'function') playSfx('hover')">
+                    <div class="absolute top-0 right-0 p-2 text-6xl font-black text-slate-800 z-0 opacity-30 font-display">0${i+1}</div>
                     <div class="relative z-10">
-                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-[var(--theme-color)] transition-colors font-display">${card.title}</h3>
-                        <div class="h-0.5 w-12 mb-4 bg-slate-700 group-hover:w-full transition-all duration-500" style="background-color: var(--theme-color)"></div>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-[${project.colorHex}] transition-colors font-display">${card.title}</h3>
+                        <div class="h-1 w-8 mb-4" style="background-color: ${project.colorHex}"></div>
                         <p class="text-slate-400 text-sm leading-relaxed">${card.text}</p>
                     </div>
                 </div>`).join('')}
@@ -248,68 +481,25 @@ window.openProject = function(id) {
         </section>`;
     }
 
-    if (project.workflow) {
+    // SECTION 2: BRANDING (Si disponible)
+    if (project.branding) {
         html += `
-        <section class="mb-32 reveal-item opacity-0 transform translate-y-4 transition-all duration-700 delay-300">
-            <div class="flex items-end gap-4 mb-12 border-b border-slate-800 pb-4">
-                <span class="text-6xl font-black text-slate-800/50 font-display -mb-2">02</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-white uppercase tracking-wide font-display">Workflow <span style="color: var(--theme-color)">Opérationnel</span></h2>
-            </div>
-            <div class="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-700 before:to-transparent">
-                ${project.workflow.map((step, i) => `
-                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                    <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 border-slate-700 bg-slate-900 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 group-hover:border-[var(--theme-color)] transition-colors z-10">
-                        <span class="text-xs font-mono font-bold" style="color: var(--theme-color)">${i+1}</span>
-                    </div>
-                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 cyber-card border-l-4 md:group-odd:border-l-0 md:group-odd:border-r-4" style="border-color: var(--theme-color)">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="font-bold text-white font-display text-lg">${step.title}</h3>
-                            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">${step.phase || 'STEP ' + (i+1)}</span>
-                        </div>
-                        <p class="text-sm text-slate-400 leading-relaxed">${step.text}</p>
-                    </div>
-                </div>
-                `).join('')}
-            </div>
-        </section>`;
-    }
-
-    if (project.features) {
-        html += `
-        <section class="mb-32 reveal-item opacity-0 transform translate-y-4 transition-all duration-700 delay-400">
-            <div class="flex items-end gap-4 mb-12 border-b border-slate-800 pb-4">
-                <span class="text-6xl font-black text-slate-800/50 font-display -mb-2">03</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-white uppercase tracking-wide font-display">Capacités <span style="color: var(--theme-color)">Tactiques</span></h2>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                ${project.features.map(feat => `
-                <div class="flex items-start gap-4 p-4 border border-slate-800 bg-slate-900/30 hover:bg-slate-800/50 transition-colors rounded">
-                    <div class="mt-1 text-[var(--theme-color)]">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
-                    </div>
-                    <div>
-                        <strong class="text-slate-200 text-sm font-bold block mb-1">${feat.title}</strong>
-                        <p class="text-xs text-slate-500">${feat.text}</p>
-                    </div>
-                </div>
-                `).join('')}
-            </div>
-        </section>`;
-    }
-
-    if (project.branding && !project.features) {
-         html += `
         <section class="mb-32 reveal-item opacity-0 transform translate-y-4 transition-all duration-700">
-             <div class="bg-slate-900 border border-slate-700 p-1 rounded-xl">
+            <div class="flex items-center gap-4 mb-12 border-b border-slate-800 pb-4">
+                <span class="text-4xl font-bold text-slate-700 font-display">02</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-white uppercase tracking-wide font-display">Identité de <span style="color: ${project.colorHex}">Marque</span></h2>
+            </div>
+            <div class="bg-slate-900 border border-slate-700 p-1 rounded-xl">
                 <div class="bg-black rounded-lg p-8 border border-slate-800 relative overflow-hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                         <div class="flex flex-col justify-center">
-                            <h3 class="text-5xl font-black text-white tracking-tighter mb-2 font-display">BRAND <span style="color: var(--theme-color)">IDENTITY</span></h3>
+                            <h3 class="text-5xl font-black text-white tracking-tighter mb-2 font-display">${project.title.split(' ')[0]} <span style="color: ${project.colorHex}">${project.title.split(' ')[1] || ''}</span></h3>
+                            <p class="text-slate-500 font-mono text-sm">BRAND_ID: STRONG / TIMELESS</p>
                         </div>
                         <div class="grid grid-cols-1 gap-4">
                             ${project.branding.cards.map(card => `
                             <div class="flex items-center gap-4">
-                                <div class="w-1 h-full" style="background-color: var(--theme-color)"></div>
+                                <div class="w-1 h-full" style="background-color: ${project.colorHex}"></div>
                                 <div>
                                     <strong class="text-white block font-display tracking-wide">${card.title}</strong>
                                     <span class="text-slate-400 text-xs">${card.text}</span>
@@ -319,46 +509,57 @@ window.openProject = function(id) {
                     </div>
                 </div>
             </div>
-        </section>`;
+        </div>
+    </section>`;
     }
 
+    // SECTION 3: TECH (Si disponible)
     if (project.tech) {
         html += `
-        <section class="mb-20 reveal-item opacity-0 transform translate-y-4 transition-all duration-700 delay-500">
-            <div class="flex items-end gap-4 mb-8 border-b border-slate-800 pb-4">
-                <span class="text-6xl font-black text-slate-800/50 font-display -mb-2">04</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-white uppercase tracking-wide font-display">Architecture <span style="color: var(--theme-color)">Technique</span></h2>
+        <section class="mb-20 reveal-item opacity-0 transform translate-y-4 transition-all duration-700">
+            <div class="flex items-center gap-4 mb-12 border-b border-slate-800 pb-4">
+                <span class="text-4xl font-bold text-slate-700 font-display">03</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-white uppercase tracking-wide font-display">Architecture <span style="color: ${project.colorHex}">Technique</span></h2>
             </div>
-            <div class="cyber-border p-6 rounded bg-slate-900/80 mb-6 border-l-4" style="border-left-color: var(--theme-color)">
-                <p class="text-sm md:text-base text-slate-300 leading-relaxed font-mono">${project.tech.text}</p>
+            <div class="cyber-border p-8 rounded bg-slate-900/80 mb-8">
+                <p class="text-lg text-slate-300 leading-relaxed">${project.tech.text}</p>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 ${project.tech.stack.map(item => `
-                <div class="bg-slate-950 p-3 rounded text-center border border-slate-800 hover:border-[var(--theme-color)] transition-colors group">
-                    <span class="font-mono text-xs text-slate-500 group-hover:text-white transition-colors">${item}</span>
+                <div class="bg-slate-800/50 p-3 rounded text-center border border-slate-700 hover:border-[${project.colorHex}] transition-colors font-mono text-sm text-slate-300" onmouseenter="if(typeof playSfx === 'function') playSfx('hover')">
+                    ${item}
                 </div>`).join('')}
             </div>
         </section>`;
     }
 
-    // FALLBACK LEGACY
-    if (!project.mythology && !project.analogy && !project.workflow && project.content) {
-         html += `<div class="p-4 border border-yellow-500/50 text-yellow-500 font-mono text-xs mb-8">⚠️ LEGACY_MODE_ACTIVATED</div>`;
-         // Fallback legacy code... (simplifié pour le fix)
-         html += project.content.map(b => `<p class="mb-4 text-slate-400">${b.body || b.text || ''}</p>`).join('');
+    // --- FALLBACK CONTENU (Sécurité V1) ---
+    if (!project.mythology && !project.analogy && !project.branding && !project.tech && project.content) {
+        html += `<section class="mb-20 reveal-item opacity-0 transform translate-y-4 transition-all duration-700">
+                    <div class="bg-slate-900/50 p-6 border-l-4 border-yellow-500 mb-8">
+                        <p class="text-yellow-500 font-mono text-xs mb-2">SYSTEM_NOTICE: LEGACY_DATA_DETECTED</p>
+                        <p class="text-slate-400 text-sm">Affichage en mode compatibilité V1.</p>
+                    </div>`;
+        html += project.content.map(block => {
+            if(block.type === 'hero') return `<div class="border-l-4 border-[${project.colorHex}] pl-6 py-2 mb-12 bg-gradient-to-r from-[${project.colorHex}]/5 to-transparent"><p class="text-2xl text-slate-200 font-light italic">"${block.text}"</p></div>`;
+            if(block.type === 'section') return `<div class="mb-10"><h3 class="text-xl font-display font-bold text-[${project.colorHex}] mb-4 flex items-center"><span class="w-2 h-8 bg-[${project.colorHex}] mr-3 shadow-[0_0_10px_${project.colorHex}]"></span>${block.title}</h3><p class="text-slate-400 leading-relaxed text-lg">${block.body}</p></div>`;
+            if(block.type === 'grid') return `<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">${block.items.map(item => `<div class="bg-slate-900/50 border border-slate-800 p-4 hover:border-[${project.colorHex}] transition-colors group"><h4 class="text-[${project.colorHex}] font-mono font-bold mb-2 group-hover:translate-x-1 transition-transform">${item.title}</h4><p class="text-xs text-slate-400 border-t border-slate-800 pt-2 mt-2">${item.desc}</p></div>`).join('')}</div>`;
+            if(block.type === 'tech-stack') return `<div class="bg-slate-900/80 p-6 border border-slate-800 mb-10 relative overflow-hidden"><div class="absolute top-0 right-0 p-2 opacity-20 font-mono text-[10px] text-[${project.colorHex}]">SYSTEM_SPECS</div><h4 class="text-sm font-mono text-slate-500 mb-4 border-b border-slate-700 pb-2">TECH_STACK_DETECTED:</h4><div class="flex flex-wrap gap-3">${block.items.map(item => `<span class="px-3 py-1 bg-[${project.colorHex}]/10 text-[${project.colorHex}] border border-[${project.colorHex}]/30 rounded text-xs font-mono hover:bg-[${project.colorHex}]/20 transition-colors cursor-default">${item}</span>`).join('')}</div></div>`;
+            return '';
+        }).join('');
+        html += `</section>`;
     }
 
+    // Footer du fichier
     html += `
         <div class="mt-20 pt-8 border-t border-slate-800 text-center reveal-item opacity-0">
-             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900 border border-slate-800">
-                <div class="w-2 h-2 rounded-full animate-pulse" style="background-color: var(--theme-color)"></div>
-                <span class="text-[10px] font-mono text-slate-400">END_OF_FILE // ${project.id.toUpperCase()}</span>
-             </div>
+             <span class="text-xs font-mono" style="color: ${project.colorHex}">END_OF_FILE // ${project.id.toUpperCase()}</span>
         </div>
     `;
 
     detailContainer.innerHTML = html;
 
+    // ANIMATIONS D'ENTRÉE (Séquentielles)
     const titleEl = document.getElementById('detail-title');
     if (typeof TextScramble !== 'undefined' && titleEl) {
         const fx = new TextScramble(titleEl);
@@ -371,9 +572,8 @@ window.openProject = function(id) {
     items.forEach((item, index) => {
         setTimeout(() => {
             item.classList.remove('opacity-0', 'translate-y-4');
-            item.style.opacity = "1";
             if(Math.random() > 0.6 && typeof playSfx === 'function') playSfx('type');
-        }, 100 + (index * 100));
+        }, 300 + (index * 400));
     });
 };
 

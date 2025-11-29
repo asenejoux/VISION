@@ -60,13 +60,13 @@
             left: 2px;
             text-shadow: -2px 0 #ff00ff; /* Effet Pink */
             clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-            animation: glitch-anim-title 3s infinite linear alternate-reverse;
+            animation: glitch-anim-title 5s infinite linear alternate-reverse;
         }
         .glitch-title::after {
             left: -2px;
             text-shadow: -2px 0 #00f3ff; /* Effet Cyan */
             clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-            animation: glitch-anim-title-2 2.5s infinite linear alternate-reverse;
+            animation: glitch-anim-title-2 4.5s infinite linear alternate-reverse;
         }
         @keyframes glitch-anim-title {
             0% { clip-path: inset(10% 0 80% 0); }
@@ -341,7 +341,6 @@
     <?!= include('project_nexus'); ?>
     
     <!-- Logic Modules -->
-    <?!= include('script_fx'); ?>
     <?!= include('script_core'); ?>
 
     <!-- CLOCK SCRIPT -->

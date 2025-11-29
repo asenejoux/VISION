@@ -63,6 +63,7 @@ class AudioSystem {
 
     playSfx(type) {
         if (!this.enabled) return;
+        // Génération procédurale de sons SFX
         switch (type) {
             case 'hover': 
                 this.playTone(800, 'sine', 0.03, 0.01); 
@@ -80,6 +81,7 @@ class AudioSystem {
                 setTimeout(() => this.playTone(100, 'sawtooth', 0.2, 0.05), 100);
                 break;
             case 'type': 
+                // Son de frappe très court et aléatoire pour effet "Data Stream"
                 if(Math.random() > 0.7) this.playTone(800 + Math.random() * 400, 'square', 0.02, 0.005); 
                 break;
             case 'powerOn':
@@ -113,8 +115,8 @@ class TextScramble {
         for (let i = 0; i < length; i++) {
             const from = oldText[i] || '';
             const to = newText[i] || '';
-            const start = Math.floor(Math.random() * 40);
-            const end = start + Math.floor(Math.random() * 40);
+            const start = Math.floor(Math.random() * 80);
+            const end = start + Math.floor(Math.random() * 80);
             this.queue.push({ from, to, start, end });
         }
         cancelAnimationFrame(this.frameRequest);
